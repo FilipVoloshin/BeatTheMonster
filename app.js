@@ -6,7 +6,8 @@ new Vue({
         gameIsRunning: false,
         healCount: 3,
         playerWonCount: 0,
-        monsterWonCount: 0
+        monsterWonCount: 0,
+        logs: []
     },
     methods: {
 
@@ -14,7 +15,8 @@ new Vue({
             this.playerHealth = 100;
             this.monsterHealth = 100;
             this.gameIsRunning = false;
-            this.healCount = 3
+            this.healCount = 3;
+            this.logs = [];
         },
 
         startGame() {
@@ -23,13 +25,19 @@ new Vue({
         },
 
         attack(isSpecialAttack) {
-            let minDamage = !isSpecialAttack ? 1 : 10;
-            let maxDamage = !isSpecialAttack ? 10 : 25;
-            let playerDamage = this.random(minDamage, maxDamage);
+            let minDamage = isSpecialAttack ? 10 : 1;
+            let maxDamage = isSpecialAttack ? 25 : 10;
+            let playerDamage = this.random(minDamage, maxDamage)
             let monsterDamage = this.random(minDamage, maxDamage);
-            this.playerHealth -= monsterDamage;
+            this.writeLog(true, "Player damage is " + playerDamage + "%.");
+            this.writeLog(false, "Monster damage is " + playerDamage + "%.");
             this.monsterHealth -= playerDamage;
-            this.checkResult();
+            if (this.checkWin()) {
+                return;
+            }
+            this.playerHealth -= monsterDamage;
+            this.checkWin();
+
         },
 
         heal() {
@@ -47,35 +55,33 @@ new Vue({
         },
 
         giveUp() {
-
+            this.monsterWonCount++;
+            confirm("Slacker, you ate! Start new game") ? this.startGame() : this.setDefaults();
         },
 
         random(min, max) {
             return Math.floor(Math.random() * max) + min;
         },
 
-        checkResult() {
-            let checkForNewGame = false;
-            if (this.playerHealth <= 0 && this.monsterHealth > 0) {
-                alert("You lost! Monster won!");
-                this.monsterWonCount++;
-                checkForNewGame = true;
-            }
-            else if (this.monsterHealth <= 0 && this.playerHealth > 0) {
-                alert("You won! Monster is defeated!");
+        checkWin() {
+            if (this.monsterHealth <= 0) {
                 this.playerWonCount++;
-                checkForNewGame = true;
+                confirm("U won! New game?") ? this.startGame() : this.setDefaults();
+                return true;
             }
-            else if (this.monsterHealth == 0 && this.playerHealth == 0) {
-                alert("There are no defeated in this battle!");
-                checkForNewGame = true;
+            else if (this.playerHealth <= 0) {
+                this.monsterWonCount++;
+                confirm("U lost! New game?") ? this.startGame() : this.setDefaults();
+                return true;
             }
+            return false;
+        },
 
-            if (checkForNewGame) {
-                var startNew = confirm("Do you want to start new battle?");
-                if (startNew) this.startGame();
-                else this.setDefaults();
-            }
+        writeLog(isPlayer, message) {
+            this.logs.unshift({
+                isPlayer: isPlayer,
+                message: message
+            });
         }
     },
 })
