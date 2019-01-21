@@ -30,7 +30,7 @@ new Vue({
             let playerDamage = this.random(minDamage, maxDamage)
             let monsterDamage = this.random(minDamage, maxDamage);
             this.writeLog(true, "Player damage is " + playerDamage + "%.");
-            this.writeLog(false, "Monster damage is " + playerDamage + "%.");
+            this.writeLog(false, "Monster damage is " + monsterDamage + "%.");
             this.monsterHealth -= playerDamage;
             if (this.checkWin()) {
                 return;
